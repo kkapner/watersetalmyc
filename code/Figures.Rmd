@@ -1,0 +1,116 @@
+---
+title: "KRAS Mut WT Figure Generation"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r}
+library("ggplot2")
+library("dplyr")
+library("ggrepel")
+```
+
+# Recreation of Figure B
+
+Substituting magnitude of dependency for ES.
+
+```{r}
+mut_wt_diff <- read.csv("../output/KRAS_Mut_Wt_Group_Differences_Volcano.csv")
+
+mut_wt_diff_negative <- dplyr::filter(mut_wt_diff, differences < 0)
+```
+
+
+```{r}
+original.labeled.genes <- c("KRAS", "DOCK5", "RAF1", "RAB10", "BCAR1", "CRK", "TLN1", "FOSL1", "TEAD1", "CFLAR",
+                            "CTNNB1", "TCF7L2", "MYH9")
+mut_wt_diff_negative["diff_magnitude"] <- abs(mut_wt_diff_negative$differences)
+
+all_plot <- ggplot(data = mut_wt_diff_negative, aes(diff_magnitude, logp)) +
+  geom_point(size = 0.5, alpha=0.5) +
+  geom_point(aes(diff_magnitude, logp, color = "#ff0000 "),
+             data = mut_wt_diff_negative[mut_wt_diff_negative$logp > 1.301, ], size=0.5) +
+  geom_label_repel(aes(diff_magnitude, logp, label = genes),
+                   data = mut_wt_diff_negative[mut_wt_diff_negative$genes %in% original.labeled.genes,],
+                   size = 1.5) +
+  theme_classic() +
+  xlab("Magnitude of Mean CERES Score Difference") +
+  ylab("-log10(p value)") +
+  annotate(geom="text", x=0.3, y=30, label="KRAS mutant vs. WT cell lines",
+              color="black") + 
+  annotate(geom="text", x=0.3, y=28, label="Significant (p < 0.05)",
+              color="red") +
+  theme(legend.position = "none")
+
+
+original.labeled.genes.no.KRAS <- c("DOCK5", "RAF1", "RAB10", "BCAR1", "CRK", "TLN1", "FOSL1", "TEAD1", "CFLAR",
+                            "CTNNB1", "TCF7L2", "MYH9", "ITIH3", "ERP44")
+
+no_kras_mut_wt_negative <- dplyr::filter(mut_wt_diff_negative, genes != "KRAS")
+no_kras_plot <- ggplot(data = no_kras_mut_wt_negative, aes(diff_magnitude, logp)) +
+  geom_point(size = 0.5, alpha=0.5) +
+  geom_point(aes(diff_magnitude, logp, color = "#ff0000 "),
+             data = no_kras_mut_wt_negative[no_kras_mut_wt_negative$logp > 1.301, ], size=0.5) +
+  geom_label_repel(aes(diff_magnitude, logp, label = genes),
+                   data = no_kras_mut_wt_negative[no_kras_mut_wt_negative$genes %in% original.labeled.genes.no.KRAS,],
+                   size = 1.5) +
+  theme_classic() +
+  ylim(c(0, 11)) +
+  xlab("Magnitude of Mean CERES Score Difference") +
+  ylab("-log10(p value)") +
+  theme(legend.position = "none")
+
+cowplot::plot_grid(all_plot, no_kras_plot)
+ggsave("../output/FigureB_MeanCERESMagnitude_KRAS_MutWT_BrokenAxes.pdf")
+```
+
+# Dependency Volcano
+
+```{r}
+depend_diff <- read.csv("../output/KRAS_Dependency_Group_Differences_Volcano.csv")
+
+```
+
+```{r}
+original.labeled.genes <- c("DOCK5", "RAF1", "RAB10", "MYH9", "CFLAR", "CRKL", "NCKAP1", 
+                            "BCAR1", "PTPN12", "MCL1", "EP300", "DNAJC9", "CDAN1")
+
+ggplot(data = depend_diff, aes(differences, logp)) +
+  geom_point(alpha = 0.7) +
+  geom_label_repel(aes(differences, logp, label = genes), 
+             data = depend_diff[depend_diff$genes %in% original.labeled.genes,],
+            size=2) +
+  xlim(c(-0.3, 0.3)) +
+  ylim(c(0, 15)) +
+  xlab("Mean CERES score difference") +
+  ylab("-log10(p value)") +
+  theme_bw()
+
+ggsave("../output/MeanCERES_KRAS_RNAiDependencyStratified_Volcano.pdf")
+```
+
+# Pancreas KRAS Dependency vs Non-Pancreas KRAS Independent
+
+
+```{r}
+depend_diff_panc <- read.csv("../output/KRAS_PancDependency_NonPancKRASIndependGroup_Differences.csv")
+
+```
+
+```{r}
+original.labeled.genes <- c("DOCK5", "RAF1", "RAB10", "MYH9", "CFLAR", "CRKL", "NCKAP1", 
+                            "BCAR1", "PTPN12", "MCL1", "EP300", "DNAJC9", "CDAN1", "KRAS", "MIB1", "RRAS2")
+
+ggplot(data = depend_diff_panc, aes(differences, logp)) +
+  geom_point(alpha = 0.7) +
+  geom_label_repel(aes(differences, logp, label = genes), 
+             data = depend_diff_panc[depend_diff_panc$genes %in% original.labeled.genes,],
+            size=2) +
+  xlab("Mean CERES score difference") +
+  ylab("-log10(p value)") +
+  theme_bw()
+  
+ggsave("../output/MeanCERES_KRASDependentPanc_KRASIndependNonPanc_Volcano.pdf")
+```
