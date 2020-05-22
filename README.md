@@ -6,5 +6,9 @@ Data analysis for plot generation is performed in the jupyter notebook titled "K
 
 The R notebook "Figures.Rmd" was used to read in the data and create the final figures. There is also a corresponding HTML version titled "Figures.html".
 
-All raw data used for analysis can be found in the data folder.
+All raw data used for analysis can be found at the following DropBox link: 
+
+https://www.dropbox.com/sh/204cf7vv1l4ea8c/AACmAupkrVLAJRHhcgkrR_14a?dl=0
+
+Once downloaded, the data directory should be placed in the same level as the code and output directories.
 
